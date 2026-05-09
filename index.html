@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>金融工具箱</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-page:        #f4f3ef;
+    --bg-card:        #ffffff;
+    --bg-input:       #f7f6f2;
+    --bg-metric:      #f2f1ed;
+    --bg-btn-hover:   #f0efe9;
+    --bg-tab-active:  #ffffff;
+    --bg-tab-idle:    transparent;
+    --text-primary:   #1a1a18;
+    --text-secondary: #6b6a65;
+    --text-tertiary:  #a09f9a;
+    --text-accent:    #185FA5;
+    --text-accent2:   #0f6e56;
+    --border-subtle:  rgba(0,0,0,0.08);
+    --border-mid:     rgba(0,0,0,0.15);
+    --border-strong:  rgba(0,0,0,0.25);
+    --danger-bg:      #fef2f2;
+    --danger-text:    #b91c1c;
+    --danger-border:  rgba(185,28,28,0.25);
+    --success-bg:     #f0fdf4;
+    --success-text:   #15803d;
+    --radius-md:      8px;
+    --radius-lg:      12px;
+    --font-ui:        -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono:      'Courier New', 'Consolas', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-page:        #1c1c1a;
+      --bg-card:        #242422;
+      --bg-input:       #2a2a28;
+      --bg-metric:      #2e2e2b;
+      --bg-btn-hover:   #303030;
+      --bg-tab-active:  #2e2e2b;
+      --text-primary:   #e8e7e2;
+      --text-secondary: #9a9992;
+      --text-tertiary:  #6a6960;
+      --text-accent:    #60a5e8;
+      --text-accent2:   #4ade80;
+      --border-subtle:  rgba(255,255,255,0.07);
+      --border-mid:     rgba(255,255,255,0.12);
+      --border-strong:  rgba(255,255,255,0.22);
+      --danger-bg:      rgba(185,28,28,0.15);
+      --danger-text:    #f87171;
+      --danger-border:  rgba(248,113,113,0.3);
+      --success-bg:     rgba(21,128,61,0.15);
+      --success-text:   #4ade80;
+    }
+  }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .shell { width: 100%; max-width: 580px; }
+
+  /* ── Page header ── */
+  .page-header { margin-bottom: 1.75rem; }
+  .page-header .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-size: 24px; font-weight: 500; color: var(--text-primary); letter-spacing: -0.3px;
+  }
+
+  /* ── Tab nav ── */
+  .tab-nav {
+    display: flex; gap: 4px;
+    background: var(--bg-input);
+    border: 0.5px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    margin-bottom: 1.25rem;
+  }
+  .tab-btn {
+    flex: 1; height: 36px; border: none; border-radius: var(--radius-md);
+    background: transparent; color: var(--text-secondary);
+    font-size: 13px; font-weight: 500; font-family: var(--font-ui);
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .tab-btn svg { flex-shrink: 0; }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active {
+    background: var(--bg-tab-active);
+    color: var(--text-primary);
+    border: 0.5px solid var(--border-subtle);
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1.5rem; padding-bottom: 1rem;
+    border-bottom: 0.5px solid var(--border-subtle);
+  }
+  .card-header svg { color: var(--text-secondary); flex-shrink: 0; }
+  .card-header .card-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .card-header .card-sub   { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+
+  /* ── Inputs ── */
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.25rem; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--text-secondary); text-transform: uppercase;
+  }
+  .field input {
+    height: 38px; background: var(--bg-input);
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-md);
+    color: var(--text-primary); font-size: 14px; font-family: var(--font-mono);
+    padding: 0 10px; outline: none; width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none; -webkit-appearance: none;
+  }
+  .field input:focus {
+    border-color: var(--border-strong);
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.1);
+  }
+  .field input[type="date"] { font-family: var(--font-ui); font-size: 13px; }
+  .field .hint { font-size: 11px; color: var(--text-tertiary); }
+
+  /* ── Button ── */
+  .calc-btn {
+    width: 100%; height: 40px; background: transparent;
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-md);
+    color: var(--text-primary); font-size: 14px; font-weight: 500;
+    font-family: var(--font-ui); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.12s, border-color 0.12s; margin-bottom: 1.25rem;
+  }
+  .calc-btn:hover { background: var(--bg-btn-hover); border-color: var(--border-strong); }
+  .calc-btn:active { transform: scale(0.985); }
+
+  /* ── Error ── */
+  .error-box {
+    background: var(--danger-bg); color: var(--danger-text);
+    border: 0.5px solid var(--danger-border); border-radius: var(--radius-md);
+    padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; display: none;
+  }
+
+  /* ── Results ── */
+  .results { display: none; }
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .metric { background: var(--bg-metric); border-radius: var(--radius-md); padding: 0.875rem 1rem; }
+  .metric-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;
+  }
+  .metric-value {
+    font-size: 19px; font-weight: 500; color: var(--text-primary);
+    font-family: var(--font-mono); line-height: 1.2;
+  }
+  .metric-value.accent  { color: var(--text-accent); }
+  .metric-value.accent2 { color: var(--text-accent2); }
+  .metric-sub { font-size: 10px; color: var(--text-tertiary); margin-top: 4px; }
+
+  .divider { height: 0.5px; background: var(--border-subtle); margin: 1.25rem 0; }
+
+  .detail-table { width: 100%; border-collapse: collapse; }
+  .detail-table tr td { padding: 6px 0; font-size: 13px; border-bottom: 0.5px solid var(--border-subtle); }
+  .detail-table tr:last-child td { border-bottom: none; }
+  .detail-table td:first-child { color: var(--text-secondary); }
+  .detail-table td:last-child {
+    text-align: right; font-family: var(--font-mono);
+    font-size: 13px; color: var(--text-primary); font-weight: 500;
+  }
+
+  .pill {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 99px; margin-left: 6px;
+    vertical-align: middle; font-family: var(--font-ui); letter-spacing: 0.04em;
+  }
+  .pill.premium  { background: var(--danger-bg);  color: var(--danger-text); }
+  .pill.discount { background: var(--success-bg); color: var(--success-text); }
+  .pill.par      { background: var(--bg-metric);  color: var(--text-tertiary); }
+
+  /* ── Sensitivity mini-chart ── */
+  .sens-wrap { margin-top: 1.25rem; }
+  .sens-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 10px;
+  }
+  .sens-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .sens-table th {
+    text-align: right; padding: 4px 6px; color: var(--text-tertiary);
+    font-weight: 600; letter-spacing: 0.04em; border-bottom: 0.5px solid var(--border-subtle);
+  }
+  .sens-table th:first-child { text-align: left; }
+  .sens-table td { padding: 5px 6px; text-align: right; font-family: var(--font-mono); font-size: 12px; }
+  .sens-table td:first-child { text-align: left; color: var(--text-secondary); font-family: var(--font-ui); }
+  .sens-table tr.highlight td { color: var(--text-accent2); font-weight: 500; }
+  .sens-table tr:not(:last-child) td { border-bottom: 0.5px solid var(--border-subtle); }
+  .up   { color: var(--danger-text); }
+  .down { color: var(--success-text); }
+
+  /* ── Compound growth chart ── */
+  .chart-wrap { margin-top: 1.25rem; position: relative; }
+  .chart-canvas-wrap { position: relative; width: 100%; height: 180px; }
+  canvas#grow-chart { width: 100% !important; height: 180px !important; }
+  .chart-legend { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .milestone-row {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 10px;
+  }
+  .milestone {
+    background: var(--bg-metric); border-radius: var(--radius-md);
+    padding: 0.75rem; text-align: center;
+  }
+  .milestone-yr { font-size: 10px; font-weight: 600; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+  .milestone-val { font-size: 15px; font-weight: 500; font-family: var(--font-mono); color: var(--text-primary); }
+  .milestone-sub { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 1.5rem; font-size: 11px; color: var(--text-tertiary);
+    text-align: center; line-height: 1.6;
+  }
+
+  /* ── Panel visibility ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="page-header">
+    <div class="eyebrow">金融工具箱</div>
+    <h1>金融工具箱</h1>
+  </div>
+
+  <div class="tab-nav" role="tablist">
+    <button class="tab-btn active" role="tab" aria-selected="true"  onclick="switchTab('ytm', this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      价格 → YTM
+    </button>
+    <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('price', this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      YTM → 价格
+    </button>
+    <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('grow', this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+      复利增长
+    </button>
+  </div>
+
+  <!-- ══════════ PANEL 1: YTM ══════════ -->
+  <div class="panel active" id="panel-ytm">
+    <div class="card">
+      <div class="card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <div>
+          <div class="card-title">到期收益率 Yield to Maturity</div>
+          <div class="card-sub">输入市场价格，反算年化 YTM</div>
+        </div>
+      </div>
+
+      <div class="error-box" id="ytm-err"></div>
+
+      <div class="input-grid">
+        <div class="field">
+          <label>当前价格</label>
+          <input type="number" id="y-price" placeholder="95.50" step="0.01" min="0.01" />
+          <span class="hint">债券市场报价</span>
+        </div>
+        <div class="field">
+          <label>票面价格</label>
+          <input type="number" id="y-face" value="100" step="0.01" min="0.01" />
+          <span class="hint">到期偿还面值</span>
+        </div>
+        <div class="field">
+          <label>年票面利率 %</label>
+          <input type="number" id="y-coupon" placeholder="5.00" step="0.01" min="0" />
+          <span class="hint">每年付息利率</span>
+        </div>
+        <div class="field">
+          <label>到期日</label>
+          <input type="date" id="y-maturity" />
+          <span class="hint">债券到期日期</span>
+        </div>
+        <div class="field">
+          <label>付息频率（次/年）</label>
+          <input type="number" id="y-freq" value="2" step="1" min="1" max="12" />
+          <span class="hint">半年付=2，年付=1</span>
+        </div>
+        <div class="field">
+          <label>结算日</label>
+          <input type="date" id="y-settle" />
+          <span class="hint">默认今日</span>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcYTM()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        计算到期收益率
+      </button>
+
+      <div class="results" id="ytm-results">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="metric-label">到期收益率 YTM</div>
+            <div class="metric-value accent" id="y-r-ytm">—</div>
+            <div class="metric-sub">年化，税前</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">当期收益率</div>
+            <div class="metric-value" id="y-r-cy">—</div>
+            <div class="metric-sub">票息 / 价格</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">剩余年限</div>
+            <div class="metric-value" id="y-r-years">—</div>
+            <div class="metric-sub" id="y-r-psub">付息期数</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <table class="detail-table">
+          <tr><td>每期票息</td><td id="y-d-cpn">—</td></tr>
+          <tr><td>溢 / 折价</td><td id="y-d-prem">—</td></tr>
+          <tr><td>修正久期</td><td id="y-d-dur">—</td></tr>
+          <tr><td>价格敏感度 DV01</td><td id="y-d-dv01">—</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PANEL 2: PRICE ══════════ -->
+  <div class="panel" id="panel-price">
+    <div class="card">
+      <div class="card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div>
+          <div class="card-title">债券价格反算 Bond Pricing</div>
+          <div class="card-sub">输入目标 YTM，计算理论全价与净价</div>
+        </div>
+      </div>
+
+      <div class="error-box" id="p-err"></div>
+
+      <div class="input-grid">
+        <div class="field">
+          <label>目标 YTM %</label>
+          <input type="number" id="p-ytm" placeholder="4.50" step="0.001" />
+          <span class="hint">年化到期收益率</span>
+        </div>
+        <div class="field">
+          <label>票面价格</label>
+          <input type="number" id="p-face" value="100" step="0.01" min="0.01" />
+          <span class="hint">到期偿还面值</span>
+        </div>
+        <div class="field">
+          <label>年票面利率 %</label>
+          <input type="number" id="p-coupon" placeholder="5.00" step="0.01" min="0" />
+          <span class="hint">每年付息利率</span>
+        </div>
+        <div class="field">
+          <label>到期日</label>
+          <input type="date" id="p-maturity" />
+          <span class="hint">债券到期日期</span>
+        </div>
+        <div class="field">
+          <label>付息频率（次/年）</label>
+          <input type="number" id="p-freq" value="2" step="1" min="1" max="12" />
+          <span class="hint">半年付=2，年付=1</span>
+        </div>
+        <div class="field">
+          <label>结算日</label>
+          <input type="date" id="p-settle" />
+          <span class="hint">默认今日</span>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcPrice()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        计算债券价格
+      </button>
+
+      <div class="results" id="p-results">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="metric-label">全价（脏价）</div>
+            <div class="metric-value accent2" id="p-r-dirty">—</div>
+            <div class="metric-sub">含应计利息</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">净价（报价）</div>
+            <div class="metric-value accent" id="p-r-clean">—</div>
+            <div class="metric-sub">市场通常报净价</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">应计利息</div>
+            <div class="metric-value" id="p-r-ai">—</div>
+            <div class="metric-sub" id="p-r-aisub">自上次付息日</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <table class="detail-table">
+          <tr><td>溢 / 折价（净价 vs 面值）</td><td id="p-d-prem">—</td></tr>
+          <tr><td>当期收益率</td><td id="p-d-cy">—</td></tr>
+          <tr><td>修正久期</td><td id="p-d-dur">—</td></tr>
+          <tr><td>价格敏感度 DV01</td><td id="p-d-dv01">—</td></tr>
+        </table>
+
+        <!-- Sensitivity table -->
+        <div class="sens-wrap">
+          <div class="sens-title">利率敏感性分析（净价）</div>
+          <table class="sens-table">
+            <thead>
+              <tr>
+                <th>YTM 变动</th>
+                <th>净价</th>
+                <th>价格变动</th>
+                <th>变动 %</th>
+              </tr>
+            </thead>
+            <tbody id="p-sens-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PANEL 3: COMPOUND GROWTH ══════════ -->
+  <div class="panel" id="panel-grow">
+    <div class="card">
+      <div class="card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+        <div>
+          <div class="card-title">复利增长计算器</div>
+          <div class="card-sub">初始投入 + 每月定投，预测若干年后的终值</div>
+        </div>
+      </div>
+
+      <div class="error-box" id="grow-err"></div>
+
+      <div class="input-grid">
+        <div class="field">
+          <label>初始投入</label>
+          <input type="number" id="g-init" placeholder="100000" step="1000" min="0" />
+          <span class="hint">一次性投入金额</span>
+        </div>
+        <div class="field">
+          <label>每月定投</label>
+          <input type="number" id="g-monthly" placeholder="5000" step="100" min="0" />
+          <span class="hint">每月月初追加投入</span>
+        </div>
+        <div class="field">
+          <label>年化收益率 %</label>
+          <input type="number" id="g-rate" placeholder="8.00" step="0.1" />
+          <span class="hint">预期年化回报率</span>
+        </div>
+        <div class="field">
+          <label>投资年限（年）</label>
+          <input type="number" id="g-years" placeholder="20" step="1" min="1" max="50" />
+          <span class="hint">最长 50 年</span>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcGrow()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        计算终值
+      </button>
+
+      <div class="results" id="grow-results">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="metric-label">最终总资产</div>
+            <div class="metric-value accent" id="g-r-total">—</div>
+            <div class="metric-sub" id="g-r-total-sub">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">总投入本金</div>
+            <div class="metric-value" id="g-r-principal">—</div>
+            <div class="metric-sub">初始 + 月投合计</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">复利收益</div>
+            <div class="metric-value accent2" id="g-r-gain">—</div>
+            <div class="metric-sub" id="g-r-gain-sub">占总资产比例</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Milestone rows -->
+        <div class="sens-title">各阶段预估值</div>
+        <div class="milestone-row" id="g-milestones"></div>
+
+        <!-- Chart -->
+        <div class="chart-wrap">
+          <div class="sens-title" style="margin-top:1rem;">资产增长曲线</div>
+          <div class="chart-canvas-wrap">
+            <canvas id="grow-chart"></canvas>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div>总资产</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#a09f9a"></div>累计本金</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    债券计算基于离散现金流折现；复利计算假设月初投入、月复利。结果仅供参考，不构成投资建议。
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ── Utilities ── */
+  const pad = n => String(n).padStart(2, '0');
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  ['y-settle','p-settle'].forEach(id => document.getElementById(id).value = todayStr);
+
+  const MS_YEAR = 365.25 * 24 * 3600 * 1000;
+
+  function pvBond(ytmPer, n, cpn, face) {
+    let s = 0;
+    for (let i = 1; i <= n; i++) s += cpn / Math.pow(1 + ytmPer, i);
+    return s + face / Math.pow(1 + ytmPer, n);
+  }
+
+  function modDurCalc(ytm, freq, n, cpn, face, price) {
+    let mac = 0;
+    for (let i = 1; i <= n; i++) mac += (i/freq) * cpn / Math.pow(1 + ytm/freq, i);
+    mac += (n/freq) * face / Math.pow(1 + ytm/freq, n);
+    mac /= price;
+    return mac / (1 + ytm/freq);
+  }
+
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.style.display = 'block';
+  }
+  function clearErr(id) { document.getElementById(id).style.display = 'none'; }
+
+  /* ── Shared fields: face, coupon, freq, maturity, settle ── */
+  // Map: from-prefix → to-prefix, for the fields that exist in both panels
+  const SHARED = ['face','coupon','freq','maturity','settle'];
+
+  function syncTo(toPrefix) {
+    const fromPrefix = toPrefix === 'p' ? 'y' : 'p';
+    SHARED.forEach(field => {
+      const src = document.getElementById(`${fromPrefix}-${field}`);
+      const dst = document.getElementById(`${toPrefix}-${field}`);
+      if (src && dst && src.value !== '') dst.value = src.value;
+    });
+    // Also: if switching to price panel, pre-fill YTM from the last computed YTM result
+    if (toPrefix === 'p') {
+      const ytmEl = document.getElementById('y-r-ytm');
+      const ytmDst = document.getElementById('p-ytm');
+      if (ytmEl && ytmEl.textContent && ytmEl.textContent !== '—') {
+        const ytmVal = parseFloat(ytmEl.textContent);
+        if (!isNaN(ytmVal)) ytmDst.value = ytmVal.toFixed(4);
+      }
+    }
+  }
+
+  /* ── Tab switch ── */
+  window.switchTab = function(name, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    document.getElementById('panel-'+name).classList.add('active');
+    // Sync shared bond fields between ytm ↔ price panels only
+    if (name === 'price') syncTo('p');
+    if (name === 'ytm')   syncTo('y');
+  };
+
+  /* ════════════════════════════════════
+     PANEL 1 — YTM calculation
+  ════════════════════════════════════ */
+  window.calcYTM = function () {
+    clearErr('ytm-err');
+    const price  = parseFloat(document.getElementById('y-price').value);
+    const face   = parseFloat(document.getElementById('y-face').value) || 100;
+    const coupon = parseFloat(document.getElementById('y-coupon').value);
+    const freq   = parseInt(document.getElementById('y-freq').value) || 2;
+    const matStr = document.getElementById('y-maturity').value;
+    const setStr = document.getElementById('y-settle').value;
+
+    if (isNaN(price)||price<=0)   return showErr('ytm-err','请输入有效的当前价格（大于 0）');
+    if (isNaN(coupon)||coupon<0)  return showErr('ytm-err','请输入有效的票面利率（%）');
+    if (!matStr)                   return showErr('ytm-err','请选择到期日');
+    if (!setStr)                   return showErr('ytm-err','请选择结算日');
+    const matDate = new Date(matStr), setDate = new Date(setStr);
+    if (matDate <= setDate)        return showErr('ytm-err','到期日必须晚于结算日');
+
+    const yearsExact = (matDate - setDate) / MS_YEAR;
+    const n = Math.max(1, Math.round(yearsExact * freq));
+    const cpn = (coupon/100) * face / freq;
+    const annCpn = (coupon/100) * face;
+
+    let lo = -0.9999, hi = 50, mid = 0.05;
+    for (let i = 0; i < 300; i++) {
+      mid = (lo + hi) / 2;
+      pvBond(mid/freq, n, cpn, face) > price ? lo = mid : hi = mid;
+      if (Math.abs(hi-lo) < 1e-12) break;
+    }
+    const ytm = mid;
+    const cy = annCpn / price;
+    const modDur = modDurCalc(ytm, freq, n, cpn, face, price);
+    const dv01 = modDur * price / 10000;
+    const premAmt = price - face;
+    let premHTML = premAmt > 0.005
+      ? `+${premAmt.toFixed(2)} <span class="pill premium">溢价</span>`
+      : premAmt < -0.005
+      ? `${premAmt.toFixed(2)} <span class="pill discount">折价</span>`
+      : `0.00 <span class="pill par">平价</span>`;
+
+    document.getElementById('y-r-ytm').textContent  = (ytm*100).toFixed(4)+'%';
+    document.getElementById('y-r-cy').textContent   = (cy*100).toFixed(4)+'%';
+    document.getElementById('y-r-years').textContent= yearsExact.toFixed(2)+' 年';
+    document.getElementById('y-r-psub').textContent = `共 ${n} 个付息期`;
+    document.getElementById('y-d-cpn').textContent  = cpn.toFixed(4);
+    document.getElementById('y-d-prem').innerHTML   = premHTML;
+    document.getElementById('y-d-dur').textContent  = modDur.toFixed(4)+' 年';
+    document.getElementById('y-d-dv01').textContent = dv01.toFixed(6);
+    document.getElementById('ytm-results').style.display = 'block';
+  };
+
+  /* ════════════════════════════════════
+     PANEL 2 — Price calculation
+  ════════════════════════════════════ */
+  window.calcPrice = function () {
+    clearErr('p-err');
+    const ytm    = parseFloat(document.getElementById('p-ytm').value) / 100;
+    const face   = parseFloat(document.getElementById('p-face').value) || 100;
+    const coupon = parseFloat(document.getElementById('p-coupon').value);
+    const freq   = parseInt(document.getElementById('p-freq').value) || 2;
+    const matStr = document.getElementById('p-maturity').value;
+    const setStr = document.getElementById('p-settle').value;
+
+    if (isNaN(ytm))               return showErr('p-err','请输入有效的 YTM（%）');
+    if (isNaN(coupon)||coupon<0)  return showErr('p-err','请输入有效的票面利率（%）');
+    if (!matStr)                   return showErr('p-err','请选择到期日');
+    if (!setStr)                   return showErr('p-err','请选择结算日');
+    const matDate = new Date(matStr), setDate = new Date(setStr);
+    if (matDate <= setDate)        return showErr('p-err','到期日必须晚于结算日');
+
+    const yearsExact = (matDate - setDate) / MS_YEAR;
+    const n = Math.max(1, Math.round(yearsExact * freq));
+    const cpn = (coupon/100) * face / freq;
+    const annCpn = (coupon/100) * face;
+
+    // Full (dirty) price
+    const dirty = pvBond(ytm/freq, n, cpn, face);
+
+    // Accrued interest: fraction of current period elapsed
+    // Days since last coupon / days in period (approx)
+    const periodDays = 365.25 / freq;
+    const totalDays  = yearsExact * 365.25;
+    const daysIntoLastPeriod = totalDays % periodDays;
+    const accrued = cpn * (daysIntoLastPeriod / periodDays);
+    const clean   = dirty - accrued;
+
+    const cy = annCpn / clean;
+    const modDur = modDurCalc(ytm, freq, n, cpn, face, dirty);
+    const dv01   = modDur * dirty / 10000;
+
+    const premAmt = clean - face;
+    let premHTML = premAmt > 0.005
+      ? `+${premAmt.toFixed(4)} <span class="pill premium">溢价</span>`
+      : premAmt < -0.005
+      ? `${premAmt.toFixed(4)} <span class="pill discount">折价</span>`
+      : `0.0000 <span class="pill par">平价</span>`;
+
+    document.getElementById('p-r-dirty').textContent = dirty.toFixed(4);
+    document.getElementById('p-r-clean').textContent = clean.toFixed(4);
+    document.getElementById('p-r-ai').textContent    = accrued.toFixed(4);
+    document.getElementById('p-r-aisub').textContent = `已过 ${daysIntoLastPeriod.toFixed(1)} 天`;
+    document.getElementById('p-d-prem').innerHTML    = premHTML;
+    document.getElementById('p-d-cy').textContent    = (cy*100).toFixed(4)+'%';
+    document.getElementById('p-d-dur').textContent   = modDur.toFixed(4)+' 年';
+    document.getElementById('p-d-dv01').textContent  = dv01.toFixed(6);
+
+    // Sensitivity table: ±300bp in 50bp steps
+    const shifts = [-0.030, -0.020, -0.010, -0.005, 0, +0.005, +0.010, +0.020, +0.030];
+    const labels = ['-300bp','-200bp','-100bp','-50bp','当前','+50bp','+100bp','+200bp','+300bp'];
+    let rows = '';
+    shifts.forEach((sh, i) => {
+      const y2 = ytm + sh;
+      const dp = pvBond(y2/freq, n, cpn, face);
+      const acc2 = cpn * (daysIntoLastPeriod / periodDays);
+      const cl2  = dp - acc2;
+      const chg  = cl2 - clean;
+      const pct  = (chg / clean) * 100;
+      const isCurrent = sh === 0;
+      const chgClass = sh < 0 ? 'down' : sh > 0 ? 'up' : '';
+      rows += `<tr${isCurrent ? ' class="highlight"' : ''}>
+        <td>${labels[i]}</td>
+        <td>${cl2.toFixed(4)}</td>
+        <td class="${chgClass}">${sh===0 ? '—' : (chg>=0?'+':'')+chg.toFixed(4)}</td>
+        <td class="${chgClass}">${sh===0 ? '—' : (pct>=0?'+':'')+pct.toFixed(2)+'%'}</td>
+      </tr>`;
+    });
+    document.getElementById('p-sens-body').innerHTML = rows;
+    document.getElementById('p-results').style.display = 'block';
+  };
+
+  /* ════════════════════════════════════
+     PANEL 3 — Compound Growth
+  ════════════════════════════════════ */
+  let growChart = null;
+
+  function fmtMoney(v) {
+    if (v >= 1e8)  return (v/1e8).toFixed(2) + ' 亿';
+    if (v >= 1e4)  return (v/1e4).toFixed(2) + ' 万';
+    return v.toFixed(0);
+  }
+
+  window.calcGrow = function () {
+    clearErr('grow-err');
+    const init    = parseFloat(document.getElementById('g-init').value) || 0;
+    const monthly = parseFloat(document.getElementById('g-monthly').value) || 0;
+    const rate    = parseFloat(document.getElementById('g-rate').value);
+    const years   = parseInt(document.getElementById('g-years').value);
+
+    if (isNaN(rate))           return showErr('grow-err', '请输入有效的年化收益率（%）');
+    if (isNaN(years)||years<1) return showErr('grow-err', '请输入有效的投资年限（1–50年）');
+    if (init < 0)              return showErr('grow-err', '初始投入不能为负数');
+    if (monthly < 0)           return showErr('grow-err', '每月定投不能为负数');
+    if (years > 50)            return showErr('grow-err', '投资年限最长 50 年');
+
+    const r = rate / 100 / 12;  // monthly rate
+    const months = years * 12;
+
+    // Build monthly series
+    const totalArr = [];     // total asset at end of each year
+    const principalArr = []; // cumulative principal at end of each year
+    const labels = [];
+
+    let balance = init;
+    let totalPrincipal = init;
+
+    for (let m = 1; m <= months; m++) {
+      balance = balance * (1 + r) + monthly;  // monthly compounding, invest at start of month
+      totalPrincipal += monthly;
+      if (m % 12 === 0) {
+        totalArr.push(balance);
+        principalArr.push(totalPrincipal);
+        labels.push(`第${m/12}年`);
+      }
+    }
+
+    const finalTotal     = totalArr[totalArr.length - 1];
+    const finalPrincipal = totalPrincipal;
+    const finalGain      = finalTotal - finalPrincipal;
+    const gainPct        = (finalGain / finalPrincipal) * 100;
+
+    document.getElementById('g-r-total').textContent      = fmtMoney(finalTotal);
+    document.getElementById('g-r-total-sub').textContent  = `${years} 年后终值`;
+    document.getElementById('g-r-principal').textContent  = fmtMoney(finalPrincipal);
+    document.getElementById('g-r-gain').textContent       = fmtMoney(finalGain);
+    document.getElementById('g-r-gain-sub').textContent   = `占总资产 ${(finalGain/finalTotal*100).toFixed(1)}%`;
+
+    // Milestones: pick up to 3 evenly-spaced waypoints
+    const ms = document.getElementById('g-milestones');
+    const waypoints = years <= 3
+      ? [Math.floor(years/3), Math.floor(2*years/3), years].filter((v,i,a)=>v>0&&a.indexOf(v)===i)
+      : [Math.round(years*0.33), Math.round(years*0.66), years];
+    ms.innerHTML = waypoints.map(yr => {
+      const idx = Math.min(yr, years) - 1;
+      const v = totalArr[idx];
+      const p = principalArr[idx];
+      return `<div class="milestone">
+        <div class="milestone-yr">第 ${yr} 年</div>
+        <div class="milestone-val">${fmtMoney(v)}</div>
+        <div class="milestone-sub">本金 ${fmtMoney(p)}</div>
+      </div>`;
+    }).join('');
+
+    // Chart
+    drawChart(labels, totalArr, principalArr);
+    document.getElementById('grow-results').style.display = 'block';
+  };
+
+  function drawChart(labels, totalArr, principalArr) {
+    const canvas = document.getElementById('grow-chart');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth  || 520;
+    const H = 180;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    // Resolve CSS vars
+    const style = getComputedStyle(document.documentElement);
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const colorAccent  = isDark ? '#60a5e8' : '#185FA5';
+    const colorPrin    = isDark ? '#6a6960' : '#c8c7c2';
+    const colorGrid    = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+    const colorText    = isDark ? '#6a6960' : '#a09f9a';
+    const colorFillTop = isDark ? 'rgba(96,165,232,0.18)' : 'rgba(24,95,165,0.12)';
+
+    const PAD = { top: 12, right: 12, bottom: 32, left: 44 };
+    const cW = W - PAD.left - PAD.right;
+    const cH = H - PAD.top  - PAD.bottom;
+    const n  = totalArr.length;
+    const maxV = Math.max(...totalArr) * 1.05;
+    const minV = 0;
+
+    const xOf = i => PAD.left + (i / (n - 1)) * cW;
+    const yOf = v => PAD.top  + cH - ((v - minV) / (maxV - minV)) * cH;
+
+    // Grid lines (4 horizontal)
+    ctx.strokeStyle = colorGrid;
+    ctx.lineWidth = 0.5;
+    for (let g = 0; g <= 4; g++) {
+      const y = PAD.top + (g / 4) * cH;
+      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+      const val = maxV * (1 - g/4);
+      ctx.fillStyle = colorText;
+      ctx.font = `10px -apple-system, sans-serif`;
+      ctx.textAlign = 'right';
+      ctx.fillText(fmtMoney(val), PAD.left - 4, y + 3.5);
+    }
+
+    // Principal area (filled)
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(principalArr[0]));
+    for (let i = 1; i < n; i++) ctx.lineTo(xOf(i), yOf(principalArr[i]));
+    ctx.lineTo(xOf(n-1), yOf(0));
+    ctx.lineTo(xOf(0), yOf(0));
+    ctx.closePath();
+    ctx.fillStyle = colorPrin;
+    ctx.globalAlpha = 0.25;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Total area (filled gradient)
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(totalArr[0]));
+    for (let i = 1; i < n; i++) ctx.lineTo(xOf(i), yOf(totalArr[i]));
+    ctx.lineTo(xOf(n-1), yOf(0));
+    ctx.lineTo(xOf(0), yOf(0));
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+    grad.addColorStop(0, colorFillTop);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Principal line
+    ctx.beginPath();
+    ctx.strokeStyle = colorPrin;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    for (let i = 0; i < n; i++) {
+      i === 0 ? ctx.moveTo(xOf(i), yOf(principalArr[i])) : ctx.lineTo(xOf(i), yOf(principalArr[i]));
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Total line
+    ctx.beginPath();
+    ctx.strokeStyle = colorAccent;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < n; i++) {
+      i === 0 ? ctx.moveTo(xOf(i), yOf(totalArr[i])) : ctx.lineTo(xOf(i), yOf(totalArr[i]));
+    }
+    ctx.stroke();
+
+    // X axis labels — show up to 6 ticks
+    ctx.fillStyle = colorText;
+    ctx.font = `10px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    const step = Math.max(1, Math.ceil(n / 6));
+    for (let i = 0; i < n; i += step) {
+      ctx.fillText(labels[i], xOf(i), H - PAD.bottom + 14);
+    }
+    // Always show last label
+    ctx.fillText(labels[n-1], xOf(n-1), H - PAD.bottom + 14);
+  }
+
+})();
+</script>
+</body>
+</html>
