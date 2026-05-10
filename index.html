@@ -154,6 +154,33 @@
   }
   .field input[type="date"] { font-family: var(--font-ui); font-size: 13px; }
   .field .hint { font-size: 11px; color: var(--text-tertiary); }
+
+  /* ── Dual-mode date field ── */
+  .date-wrap { position: relative; display: flex; align-items: center; }
+  .date-wrap input[type="text"] {
+    height: 38px; background: var(--bg-input);
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-md);
+    color: var(--text-primary); font-size: 14px; font-family: var(--font-mono);
+    padding: 0 36px 0 10px; outline: none; width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .date-wrap input[type="text"]:focus {
+    border-color: var(--border-strong);
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.1);
+  }
+  .date-wrap input[type="text"].invalid { border-color: var(--danger-text); }
+  .date-wrap input[type="date"] {
+    position: absolute; opacity: 0;
+    width: 1px; height: 1px;
+    left: 0; top: 0; pointer-events: none;
+  }
+  .date-toggle {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; padding: 4px; cursor: pointer;
+    color: var(--text-tertiary); display: flex; align-items: center;
+    transition: color 0.15s; z-index: 2;
+  }
+  .date-toggle:hover { color: var(--text-accent); }
   .input-wrap { position: relative; display: flex; align-items: center; }
   .input-wrap input { padding-right: 42px; }
   .unit-badge {
@@ -322,8 +349,14 @@
         </div>
         <div class="field">
           <label>到期日</label>
-          <input type="date" id="y-maturity" />
-          <span class="hint">债券到期日期</span>
+          <div class="date-wrap">
+            <input type="text" id="y-maturity-text" placeholder="YYYY-MM-DD" oninput="onDateText('y-maturity')" autocomplete="off" />
+            <input type="date" id="y-maturity-picker" onchange="onDatePick('y-maturity')" />
+            <button class="date-toggle" onclick="toggleDatePicker('y-maturity')" title="打开日历" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <span class="hint">手输 YYYY-MM-DD，或点日历图标</span>
         </div>
         <div class="field">
           <label>付息频率（次/年）</label>
@@ -332,8 +365,14 @@
         </div>
         <div class="field">
           <label>结算日</label>
-          <input type="date" id="y-settle" />
-          <span class="hint">默认今日</span>
+          <div class="date-wrap">
+            <input type="text" id="y-settle-text" placeholder="YYYY-MM-DD" oninput="onDateText('y-settle')" autocomplete="off" />
+            <input type="date" id="y-settle-picker" onchange="onDatePick('y-settle')" />
+            <button class="date-toggle" onclick="toggleDatePicker('y-settle')" title="打开日历" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <span class="hint">手输 YYYY-MM-DD，或点日历图标</span>
         </div>
       </div>
 
@@ -402,8 +441,14 @@
         </div>
         <div class="field">
           <label>到期日</label>
-          <input type="date" id="p-maturity" />
-          <span class="hint">债券到期日期</span>
+          <div class="date-wrap">
+            <input type="text" id="p-maturity-text" placeholder="YYYY-MM-DD" oninput="onDateText('p-maturity')" autocomplete="off" />
+            <input type="date" id="p-maturity-picker" onchange="onDatePick('p-maturity')" />
+            <button class="date-toggle" onclick="toggleDatePicker('p-maturity')" title="打开日历" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <span class="hint">手输 YYYY-MM-DD，或点日历图标</span>
         </div>
         <div class="field">
           <label>付息频率（次/年）</label>
@@ -412,8 +457,14 @@
         </div>
         <div class="field">
           <label>结算日</label>
-          <input type="date" id="p-settle" />
-          <span class="hint">默认今日</span>
+          <div class="date-wrap">
+            <input type="text" id="p-settle-text" placeholder="YYYY-MM-DD" oninput="onDateText('p-settle')" autocomplete="off" />
+            <input type="date" id="p-settle-picker" onchange="onDatePick('p-settle')" />
+            <button class="date-toggle" onclick="toggleDatePicker('p-settle')" title="打开日历" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <span class="hint">手输 YYYY-MM-DD，或点日历图标</span>
         </div>
       </div>
 
@@ -567,9 +618,50 @@
   const pad = n => String(n).padStart(2, '0');
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
-  ['y-settle','p-settle'].forEach(id => document.getElementById(id).value = todayStr);
 
   const MS_YEAR = 365.25 * 24 * 3600 * 1000;
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+  // Init settle text fields to today
+  ['y-settle','p-settle'].forEach(id => {
+    document.getElementById(id+'-text').value = todayStr;
+    document.getElementById(id+'-picker').value = todayStr;
+  });
+
+  /* ── Dual-mode date helpers ── */
+  // When user types in the text box
+  window.onDateText = function(id) {
+    const text = document.getElementById(id+'-text');
+    const picker = document.getElementById(id+'-picker');
+    const val = text.value.trim();
+    if (DATE_RE.test(val)) {
+      picker.value = val;
+      text.classList.remove('invalid');
+    } else {
+      text.classList.add('invalid');
+    }
+  };
+
+  // When user picks from the calendar
+  window.onDatePick = function(id) {
+    const picker = document.getElementById(id+'-picker');
+    const text = document.getElementById(id+'-text');
+    text.value = picker.value;
+    text.classList.remove('invalid');
+    picker.style.display = 'none';
+  };
+
+  // Toggle calendar picker visibility
+  window.toggleDatePicker = function(id) {
+    const picker = document.getElementById(id+'-picker');
+    try { picker.showPicker(); } catch(e) { picker.click(); }
+  };
+
+  // Read the validated date string from a dual-mode field
+  function getDate(id) {
+    const val = document.getElementById(id+'-text').value.trim();
+    return DATE_RE.test(val) ? val : '';
+  }
 
   function pvBond(ytmPer, n, cpn, face) {
     let s = 0;
@@ -591,18 +683,28 @@
   }
   function clearErr(id) { document.getElementById(id).style.display = 'none'; }
 
-  /* ── Shared fields: face, coupon, freq, maturity, settle ── */
-  // Map: from-prefix → to-prefix, for the fields that exist in both panels
-  const SHARED = ['face','coupon','freq','maturity','settle'];
+  /* ── Shared fields sync ── */
+  const SHARED_NUM = ['face','coupon','freq'];
 
   function syncTo(toPrefix) {
     const fromPrefix = toPrefix === 'p' ? 'y' : 'p';
-    SHARED.forEach(field => {
+    // Sync number fields
+    SHARED_NUM.forEach(field => {
       const src = document.getElementById(`${fromPrefix}-${field}`);
       const dst = document.getElementById(`${toPrefix}-${field}`);
       if (src && dst && src.value !== '') dst.value = src.value;
     });
-    // Also: if switching to price panel, pre-fill YTM from the last computed YTM result
+    // Sync date text fields
+    ['maturity','settle'].forEach(field => {
+      const src = document.getElementById(`${fromPrefix}-${field}-text`);
+      const dst = document.getElementById(`${toPrefix}-${field}-text`);
+      const dstPicker = document.getElementById(`${toPrefix}-${field}-picker`);
+      if (src && dst && src.value !== '') {
+        dst.value = src.value;
+        if (dstPicker) dstPicker.value = src.value;
+      }
+    });
+    // Pre-fill YTM when switching to price panel
     if (toPrefix === 'p') {
       const ytmEl = document.getElementById('y-r-ytm');
       const ytmDst = document.getElementById('p-ytm');
@@ -619,7 +721,6 @@
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active'); btn.setAttribute('aria-selected','true');
     document.getElementById('panel-'+name).classList.add('active');
-    // Sync shared bond fields between ytm ↔ price panels only
     if (name === 'price') syncTo('p');
     if (name === 'ytm')   syncTo('y');
   };
@@ -633,13 +734,13 @@
     const face   = parseFloat(document.getElementById('y-face').value) || 100;
     const coupon = parseFloat(document.getElementById('y-coupon').value);
     const freq   = parseInt(document.getElementById('y-freq').value) || 2;
-    const matStr = document.getElementById('y-maturity').value;
-    const setStr = document.getElementById('y-settle').value;
+    const matStr = getDate('y-maturity');
+    const setStr = getDate('y-settle');
 
     if (isNaN(price)||price<=0)   return showErr('ytm-err','请输入有效的当前价格（大于 0）');
     if (isNaN(coupon)||coupon<0)  return showErr('ytm-err','请输入有效的票面利率（%）');
-    if (!matStr)                   return showErr('ytm-err','请选择到期日');
-    if (!setStr)                   return showErr('ytm-err','请选择结算日');
+    if (!matStr)                   return showErr('ytm-err','请输入有效的到期日（YYYY-MM-DD）');
+    if (!setStr)                   return showErr('ytm-err','请输入有效的结算日（YYYY-MM-DD）');
     const matDate = new Date(matStr), setDate = new Date(setStr);
     if (matDate <= setDate)        return showErr('ytm-err','到期日必须晚于结算日');
 
@@ -685,13 +786,13 @@
     const face   = parseFloat(document.getElementById('p-face').value) || 100;
     const coupon = parseFloat(document.getElementById('p-coupon').value);
     const freq   = parseInt(document.getElementById('p-freq').value) || 2;
-    const matStr = document.getElementById('p-maturity').value;
-    const setStr = document.getElementById('p-settle').value;
+    const matStr = getDate('p-maturity');
+    const setStr = getDate('p-settle');
 
     if (isNaN(ytm))               return showErr('p-err','请输入有效的 YTM（%）');
     if (isNaN(coupon)||coupon<0)  return showErr('p-err','请输入有效的票面利率（%）');
-    if (!matStr)                   return showErr('p-err','请选择到期日');
-    if (!setStr)                   return showErr('p-err','请选择结算日');
+    if (!matStr)                   return showErr('p-err','请输入有效的到期日（YYYY-MM-DD）');
+    if (!setStr)                   return showErr('p-err','请输入有效的结算日（YYYY-MM-DD）');
     const matDate = new Date(matStr), setDate = new Date(setStr);
     if (matDate <= setDate)        return showErr('p-err','到期日必须晚于结算日');
 
@@ -700,11 +801,7 @@
     const cpn = (coupon/100) * face / freq;
     const annCpn = (coupon/100) * face;
 
-    // Full (dirty) price
     const dirty = pvBond(ytm/freq, n, cpn, face);
-
-    // Accrued interest: fraction of current period elapsed
-    // Days since last coupon / days in period (approx)
     const periodDays = 365.25 / freq;
     const totalDays  = yearsExact * 365.25;
     const daysIntoLastPeriod = totalDays % periodDays;
