@@ -629,16 +629,26 @@
   });
 
   /* ── Dual-mode date helpers ── */
-  // When user types in the text box
+  // Auto-format as user types: 20260510 → 2026-05-10
   window.onDateText = function(id) {
     const text = document.getElementById(id+'-text');
     const picker = document.getElementById(id+'-picker');
-    const val = text.value.trim();
-    if (DATE_RE.test(val)) {
-      picker.value = val;
+    // Strip everything except digits
+    let digits = text.value.replace(/\D/g, '').slice(0, 8);
+    // Insert dashes
+    let formatted = digits;
+    if (digits.length > 4) formatted = digits.slice(0,4) + '-' + digits.slice(4);
+    if (digits.length > 6) formatted = digits.slice(0,4) + '-' + digits.slice(4,6) + '-' + digits.slice(6);
+    // Only update if different to avoid cursor jump
+    if (text.value !== formatted) text.value = formatted;
+    // Validate when 8 digits entered
+    if (digits.length === 8 && DATE_RE.test(formatted)) {
+      picker.value = formatted;
       text.classList.remove('invalid');
-    } else {
+    } else if (digits.length === 8) {
       text.classList.add('invalid');
+    } else {
+      text.classList.remove('invalid');
     }
   };
 
